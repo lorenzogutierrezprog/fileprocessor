@@ -35,7 +35,9 @@ writer = pd.ExcelWriter('Charger Data ' + current_time + '.xlsx', engine='xlsxwr
 workbook = writer.book
 # for each file: process, print data and plot in Excel sheet
 for file in input_folder:
-        print(str(file) + ' init')
+        print('')
+        print('')
+        print('Processing ' + str(file))
         run = data_pull(file)
         name = run[0]
         location = run[1]
@@ -62,7 +64,7 @@ for file in input_folder:
 
         figpath = temp_files + name + '.png'
         worksheet.insert_image('H1', figpath)
-        print(name + ' success')
+        print(name + ' ' + serial + ' ' + location + ' success')
 # summary page
 workbook = writer.book
 worksheet = workbook.add_worksheet('Images Summary')
