@@ -70,15 +70,25 @@ def data_pull(file):
     row = batteries.loc[batteries['Serial Number'] == serial_num]
     row = row[['Name', 'Location', 'Serial Number']]
 
-    name = str(row.iloc[0, 0])
-    location = str(row.iloc[0, 1])
-    serial = str(row.iloc[0, 2])
+    # Title from battery locations file
+    try:
+        name = str(row.iloc[0, 0])
+        location = str(row.iloc[0, 1])
+        serial = str(row.iloc[0, 2])
+        plt.title(name + ' ' + location + ' ' + serial)
+        plt.tight_layout()
+        fig = plt.savefig(temp_files + name + '.png')
+    except:
+        name = "error"
+        location = "error"
+        serial = "error"
+        plt.title("Identification Error")
+        plt.tight_layout()
+        fig = plt.savefig(temp_files + "IDError" + '.png')
 
-    # title and extract figure
-    plt.title(name + ' ' + location + ' ' + serial)
-    plt.tight_layout()
+
     # save_path = Path('C:\\Users\\lgutierrez.MYSMITHFIELD\\PycharmProjects\\Chargerdataprocessor\\Temp Files')
-    fig = plt.savefig(temp_files + name + '.png')
+
 
     plt.clf()
 
