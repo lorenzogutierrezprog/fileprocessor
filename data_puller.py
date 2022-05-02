@@ -2,7 +2,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from pathlib import Path
-# import seaborn as sns
 import matplotlib.patches as mpatches
 from pandas.api.types import CategoricalDtype
 
@@ -15,44 +14,48 @@ def data_pull(file):
 
     # define working directory
     # parsing first 6 lines of csv due to manufacturer formatting
-    first_two_rows = pd.read_csv(file, nrows=1)
+    first_two_rows = pd.read_csv(file, nrows=1, sep = '[;,]', engine = 'python')
     # second_two_rows = pd.read_csv(file, nrows=1, skiprows=2)
     # third_two_rows = pd.read_csv(file, nrows=1, skiprows=4)
 
     # the bulk of data for charger use
-    df = pd.read_csv(file, skiprows=6)
+    df = pd.read_csv(file, skiprows=6, sep = '[;,]', engine = 'python')
 
     # pulling serial number for charger identification
-    serial_num = first_two_rows.iloc[-1]['S/N                '].replace(' ', '')
+    try:
+        serial_num = first_two_rows.iloc[-1]['S/N                '].replace(' ', '')
+    except:
+        serial_num = first_two_rows.iloc[-1]['S/N EEP            '].replace(' ', '')
 
     # convert Start of charge to time, adding day of week and time of day columns
-    # id = pd.Index(, ordered=True)
     df['Charge Start'] = pd.to_datetime(df['SoC                '])
     df['Week Day'] = df['Charge Start'].dt.day_name()
     df['Day Num'] = df['Charge Start'].dt.dayofweek
     df['Time of Day'] = df['Charge Start'].dt.hour
 
     # defining charge profile as number for color scaling
-    color_dictionary2 = {'OPP    ': 'blue',  'COLD   ' :'darkblue','CMP CH ': 'green', 'EQUAL  ': 'darkred'}
-    color_steps = 1, 2, 3, 4
 
     # legend handles
-    opp = mpatches.Patch(color='blue', label='OPP')
-    cold = mpatches.Patch(color='darkblue', label='COLD')
-    cmp_ch = mpatches.Patch(color='green', label='CMP CH')
-    equal = mpatches.Patch(color='darkred', label='EQUAL')
+    opp = mpatches.Patch(color= 'blue', label= 'OPP')
+    cold = mpatches.Patch(color= 'darkblue', label= 'COLD')
+    ionic = mpatches.Patch(color= '#800080', label= 'IONIC')
+    cmp_ch = mpatches.Patch(color= 'green', label= 'CMP CH')
+    equal = mpatches.Patch(color= 'darkred', label= 'EQUAL')
+    plt.legend(handles=[opp, cold, ionic, cmp_ch, equal], bbox_to_anchor=(1.05, 1.0), loc='upper left')
 
     # print(profile_names)
-    color_dictionary = {'OPP    ': 1, 'COLD   ': 2, 'CMP CH ': 3, 'EQUAL  ': 4}
-    color = df['Profile'].replace(color_dictionary)
-    color_map = mpl.colors.ListedColormap(['blue','darkblue', 'green', 'darkred'])
-
+    color_dictionary = {'OPP    ': 1, 'COLD   ': 2, 'IONIC  ': 3, 'CMP CH ': 4, 'EQUAL  ': 5}
+    color_map = mpl.colors.ListedColormap(['blue', 'darkblue', '#800080', 'green', 'darkred'])
+    df['Color Code'] = df['Profile'].replace(color_dictionary)
+    # norm = mpl.colors.Normalize(vmin=1, vmax=5)
 
     # plot time, day, weighted charge
-    scatter = plt.scatter(df['Day Num'], df['Time of Day'], s=df['Chg Tim'] * 1.6, c=color, alpha=.6, cmap=color_map)
-    plt.legend(handles=[opp, cold, cmp_ch, equal],bbox_to_anchor=(1.05, 1.0), loc='upper left')
+    plt.scatter(df['Day Num'], df['Time of Day'], s = df['Chg Tim'] * 1.6, c = df['Color Code'], alpha = .6,
+                cmap = color_map)
+    plt.clim(vmin=1, vmax=5)
 
-    plt.xticks(ticks=[0, 1, 2, 3, 4, 5, 6], labels=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], rotation=15)
+    plt.xticks(ticks = [0, 1, 2, 3, 4, 5, 6], labels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday',
+                                                        'Saturday', 'Sunday'], rotation=15)
     plt.ylabel('Time of Day')
     # plt.show()
 
@@ -80,13 +83,13 @@ def data_pull(file):
     plt.clf()
 
     # Number of equalizes
-    if df.nunique()['Profile'] == 1:
-        EQs = 0
-    else:
+    try:
         EQs = df['Profile'].value_counts()['EQUAL  ']
+    except:
+        EQs = 0
 
     # Data date range
     time_dif = (max(df['Charge Start']) - min(df['Charge Start']))
-    print('.')
+    print('Data pulled.')
 
     return name, location, serial, fig, df, time_dif, EQs
