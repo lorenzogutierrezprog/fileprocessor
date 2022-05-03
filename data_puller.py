@@ -33,8 +33,6 @@ def data_pull(file):
     df['Day Num'] = df['Charge Start'].dt.dayofweek
     df['Time of Day'] = df['Charge Start'].dt.hour
 
-    # defining charge profile as number for color scaling
-
     # legend handles
     opp = mpatches.Patch(color= 'blue', label= 'OPP')
     cold = mpatches.Patch(color= 'darkblue', label= 'COLD')
@@ -43,17 +41,15 @@ def data_pull(file):
     equal = mpatches.Patch(color= 'darkred', label= 'EQUAL')
     plt.legend(handles=[opp, cold, ionic, cmp_ch, equal], bbox_to_anchor=(1.05, 1.0), loc='upper left')
 
-    # print(profile_names)
+
     color_dictionary = {'OPP    ': 1, 'COLD   ': 2, 'IONIC  ': 3, 'CMP CH ': 4, 'EQUAL  ': 5}
     color_map = mpl.colors.ListedColormap(['blue', 'darkblue', '#800080', 'green', 'darkred'])
     df['Color Code'] = df['Profile'].replace(color_dictionary)
-    # norm = mpl.colors.Normalize(vmin=1, vmax=5)
 
-    # plot time, day, weighted charge
+    # plot time, day, weighted charge, set color scale, create labels
     plt.scatter(df['Day Num'], df['Time of Day'], s = df['Chg Tim'] * 1.6, c = df['Color Code'], alpha = .6,
                 cmap = color_map)
     plt.clim(vmin=1, vmax=5)
-
     plt.xticks(ticks = [0, 1, 2, 3, 4, 5, 6], labels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday',
                                                         'Saturday', 'Sunday'], rotation=15)
     plt.ylabel('Time of Day')
@@ -82,9 +78,9 @@ def data_pull(file):
         name = "Error"
         location = "Error"
         serial = "Error"
-        plt.title("Error in: file " + str(file)[17:])
+        plt.title("Error in file: " + str(file)[17:-4])
         plt.tight_layout()
-        fig = plt.savefig(temp_files + "Error " + str(file)[17:] + '.png')
+        fig = plt.savefig(temp_files + "Error " + str(file)[17:-4] + '.png')
 
 
 

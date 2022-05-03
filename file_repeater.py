@@ -6,7 +6,6 @@ import os
 import xlsxwriter
 
 # defining paths
-error_count = 0
 here = str(Path.cwd())
 path = Path('files to process/')
 input_folder = path.iterdir()
@@ -44,9 +43,9 @@ for file in input_folder:
 
         # push dataframe to excel, format, add plot and text
         if name == "Error":
-                df.to_excel(writer, sheet_name=str(file)[17:])
+                df.to_excel(writer, sheet_name=str(file)[17:-4])
                 workbook = writer.book
-                worksheet = writer.sheets[str(file)[17:]]
+                worksheet = writer.sheets[str(file)[17:-4]]
         else:
                 df.to_excel(writer, sheet_name=name)
                 workbook = writer.book
@@ -65,9 +64,9 @@ for file in input_folder:
 
 
         if name == "Error":
-                figpath = temp_files + "Error " + str(file)[17:] + '.png'
+                figpath = temp_files + "Error " + str(file)[17:-4] + '.png'
                 worksheet.insert_image('H1', figpath)
-                print("Found error in file " + str(file)[17:] + " but completed")
+                print("Found error in file " + str(file)[17:-4] + " but completed")
         else:
                 figpath = temp_files + name + '.png'
                 worksheet.insert_image('H1', figpath)
@@ -84,5 +83,5 @@ for img in Path(temp_files).iterdir():
 
 writer.save()
 
-# delete png in Temp Files
-# move processed files
+# TODO delete png in Temp Files
+# TODO move processed files to folder
