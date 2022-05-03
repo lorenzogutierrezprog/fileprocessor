@@ -6,27 +6,22 @@ import os
 import xlsxwriter
 
 # defining paths
+error_count = 0
 here = str(Path.cwd())
 path = Path('files to process/')
 input_folder = path.iterdir()
 current_time = datetime.datetime.now().strftime('%m_%d_%y')
 temp_files = here + '\\Temp Files\\'
 
-# import battery locations, name, and serial correlation
-batteries = pd.read_excel('Batterylocations.xlsx')
+# import charger locations, name, and serial correlation
+chargers = pd.read_excel('Chargerlocations.xlsx')
 
-# for i in range(len(batteries)):
-#         name = batteries.iloc[i,1]
-#         print(name)
-#         worksheet = workbook.add_worksheet(name)
-# writer.save()
 
 # create excel to be written to
 writer = pd.ExcelWriter('Charger Data ' + current_time + '.xlsx', engine='xlsxwriter')
 workbook = writer.book
 
-# print(list(batteries['Name']))
-for name in list(batteries['Name']):
+for name in list(chargers['Name']):
         print(name)
         worksheet = workbook.add_worksheet(name)
 writer.save()
@@ -37,7 +32,7 @@ workbook = writer.book
 for file in input_folder:
         print('')
         print('')
-        print('Processing ' + str(file))
+        print('Processing ' + str(file)[17:])
         run = data_pull(file)
         name = run[0]
         location = run[1]
@@ -48,9 +43,15 @@ for file in input_folder:
         EQs = run[6]
 
         # push dataframe to excel, format, add plot and text
-        df.to_excel(writer, sheet_name=name)
-        workbook = writer.book
-        worksheet = writer.sheets[name]
+        if name == "Error":
+                df.to_excel(writer, sheet_name=str(file)[17:])
+                workbook = writer.book
+                worksheet = writer.sheets[str(file)[17:]]
+        else:
+                df.to_excel(writer, sheet_name=name)
+                workbook = writer.book
+                worksheet = writer.sheets[name]
+
         header = workbook.add_format({'bold': True})
         header.set_align('right')
         worksheet.set_column('A:D', 10)
@@ -62,9 +63,17 @@ for file in input_folder:
         worksheet.write('F8', 'EQs Per Week', header)
         worksheet.write_formula('F9', '=F6 * 7 / F3')
 
-        figpath = temp_files + name + '.png'
-        worksheet.insert_image('H1', figpath)
-        print(name + ' ' + serial + ' ' + location + ' success')
+
+        if name == "Error":
+                figpath = temp_files + "Error " + str(file)[17:] + '.png'
+                worksheet.insert_image('H1', figpath)
+                print("Found error in file " + str(file)[17:] + " but completed")
+        else:
+                figpath = temp_files + name + '.png'
+                worksheet.insert_image('H1', figpath)
+                print(name + ' ' + serial + ' ' + location + ' - Success')
+
+
 # summary page
 workbook = writer.book
 worksheet = workbook.add_worksheet('Images Summary')
@@ -75,4 +84,5 @@ for img in Path(temp_files).iterdir():
 
 writer.save()
 
-#delete all png in Temp Files
+# delete png in Temp Files
+# move processed files

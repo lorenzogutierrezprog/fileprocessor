@@ -10,8 +10,8 @@ pd.set_option('display.max_rows', None)
 here = str(Path.cwd())
 temp_files = here + '\\Temp Files\\'
 
-def data_pull(file):
 
+def data_pull(file):
     # define working directory
     # parsing first 6 lines of csv due to manufacturer formatting
     first_two_rows = pd.read_csv(file, nrows=1, sep = '[;,]', engine = 'python')
@@ -64,13 +64,13 @@ def data_pull(file):
     df = df.filter(items=['Week Day', 'Time of Day', 'Chg Tim', 'Profile', 'Charge Start'])\
         .sort_values('Chg Tim', ascending=False).set_index('Chg Tim')
 
-    # import battery locations, name, and serial correlation
-    batteries = pd.read_excel('Batterylocations.xlsx')
+    # import charger locations, name, and serial correlation
+    chargers = pd.read_excel('Chargerlocations.xlsx')
 
-    row = batteries.loc[batteries['Serial Number'] == serial_num]
+    row = chargers.loc[chargers['Serial Number'] == serial_num]
     row = row[['Name', 'Location', 'Serial Number']]
 
-    # Title from battery locations file
+    # Title from charger locations file
     try:
         name = str(row.iloc[0, 0])
         location = str(row.iloc[0, 1])
@@ -79,15 +79,13 @@ def data_pull(file):
         plt.tight_layout()
         fig = plt.savefig(temp_files + name + '.png')
     except:
-        name = "error"
-        location = "error"
-        serial = "error"
-        plt.title("Identification Error")
+        name = "Error"
+        location = "Error"
+        serial = "Error"
+        plt.title("Error in: file " + str(file)[17:])
         plt.tight_layout()
-        fig = plt.savefig(temp_files + "IDError" + '.png')
+        fig = plt.savefig(temp_files + "Error " + str(file)[17:] + '.png')
 
-
-    # save_path = Path('C:\\Users\\lgutierrez.MYSMITHFIELD\\PycharmProjects\\Chargerdataprocessor\\Temp Files')
 
 
     plt.clf()
