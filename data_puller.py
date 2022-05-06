@@ -27,6 +27,20 @@ def data_pull(file):
     except:
         serial_num = first_two_rows.iloc[-1]['S/N EEP            '].replace(' ', '')
 
+    # number of faulty disconnects
+    try:
+        DCs = df['Bat Dis'].value_counts()['NO     ']
+        DC_percent = DCs*100/(df[df.columns[0]].count())
+    except:
+        DCs = 'Data Unavailable'
+        DC_percent = 0
+
+    # Number of equalizes
+    try:
+        EQs = df['Profile'].value_counts()['EQUAL  ']
+    except:
+        EQs = 0
+
     # convert Start of charge to time, adding day of week and time of day columns
     df['Charge Start'] = pd.to_datetime(df['SoC                '])
     df['Week Day'] = df['Charge Start'].dt.day_name()
@@ -86,14 +100,8 @@ def data_pull(file):
 
     plt.clf()
 
-    # Number of equalizes
-    try:
-        EQs = df['Profile'].value_counts()['EQUAL  ']
-    except:
-        EQs = 0
-
     # Data date range
     time_dif = (max(df['Charge Start']) - min(df['Charge Start']))
     print('Data pulled.')
 
-    return name, location, serial, fig, df, time_dif, EQs
+    return name, location, serial, fig, df, time_dif, EQs, DCs, DC_percent

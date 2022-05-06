@@ -40,6 +40,8 @@ for file in input_folder:
         df = run[4]
         time_dif = run[5]
         EQs = run[6]
+        DCs= run[7]
+        DC_percent = run[8]
 
         # push dataframe to excel, format, add plot and text
         if name == "Error":
@@ -53,6 +55,8 @@ for file in input_folder:
 
         header = workbook.add_format({'bold': True})
         header.set_align('right')
+        cell_format = workbook.add_format()
+        cell_format.set_align('right')
         worksheet.set_column('A:D', 10)
         worksheet.set_column('E:F', 20)
         worksheet.write('F2', 'Days Recorded', header)
@@ -61,6 +65,12 @@ for file in input_folder:
         worksheet.write('F6', EQs)
         worksheet.write('F8', 'EQs Per Week', header)
         worksheet.write_formula('F9', '=F6 * 7 / F3')
+        if DC_percent ==0:
+                pass
+        else:
+                worksheet.write('F11', "Invalid Disconnects", header)
+                worksheet.write('F12', DCs, cell_format)
+                worksheet.write('F13', str(round(DC_percent)) + "%", cell_format)
 
 
         if name == "Error":
